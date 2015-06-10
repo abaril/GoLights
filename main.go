@@ -3,45 +3,55 @@ package main
 import (
 	"github.com/abaril/GoLights/api"
 	"net/http"
-	"github.com/heatxsink/go-hue/src/lights"
+	"log"
 	"time"
 )
 
 func main() {
 
-	ll := lights.NewLights("192.168.1.105", "allanbaril")
-	lightsArray := ll.GetAllLights()
-	for _, light := range lightsArray {
-		ll.SetLightState(light.Id, lights.State{On:false})
-	}
-
-//	bridge := hue.NewBridge("192.168.1.105", "allanbaril").Debug()
-//	log.Println("Bridge:", bridge)
-//	lights, err := bridge.GetAllLights()
-//	if err != nil {
-//		log.Println("Unable to retrieve lights:", err)
-//	}
-//	log.Println("Lights:", lights)
-//	for _, light := range lights {
-//		log.Println("Adjusting light:", light)
-//		light.ColorLoop()
+//	ll := lights.NewLights("192.168.1.105", "allanbaril")
+//	lightsArray := ll.GetAllLights()
+//	for _, light := range lightsArray {
+//		ll.SetLightState(light.Id, lights.State{On:false})
 //	}
 
-	action := LogAction{}
-	go action.When(timeAdapter(time.Tick(1*time.Second)))
+	condition := &Toggler{}
+	When(timeTrigger, condition.toggle, firstAction(nextAction(nextAction(nil))))
 
 	http.HandleFunc("/api/v1/status", api.InitStatusAPI(api.UseMemDB))
 	http.ListenAndServe(":8080", http.DefaultServeMux)
-
 }
 
-func timeAdapter(timeChannel <-chan time.Time) <-chan bool {
+func timeTrigger(events chan<- interface{}) {
+	tc := time.Tick(1 * time.Second)
+	for range tc {
+		events <- true
+	}
+}
 
-	boolChannel := make(chan bool)
-	go func() {
-		for range timeChannel {
-			boolChannel <- true;
+type Toggler struct {
+	last bool
+}
+
+func (t *Toggler) toggle() bool {
+	t.last = !t.last
+	return t.last
+}
+
+func firstAction(a ActionFunc) ActionFunc {
+	return func() {
+		log.Println("Hello there")
+		if a != nil {
+			a()
 		}
-	}()
-	return boolChannel
+	}
+}
+
+func nextAction(a ActionFunc) ActionFunc {
+	return func() {
+		log.Println("  ... and there")
+		if a != nil {
+			a()
+		}
+	}
 }
