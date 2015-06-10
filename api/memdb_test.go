@@ -3,12 +3,13 @@ import (
 	"testing"
 	"github.com/cheekybits/is"
 	"github.com/abaril/GoLights/api"
+	"time"
 )
 
-func TestGetStatus(t *testing.T) {
+func TestGet(t *testing.T) {
 
 	is := is.New(t)
-	db := api.UseMemDB
+	db := api.NewMemDB()
 	_, err := db.Get("IsAlive")
 	if err == nil {
 		t.Error("IsAlive should return err")
@@ -23,10 +24,10 @@ func TestGetStatus(t *testing.T) {
 	is.Equal(val, true)
 }
 
-func TestSetStatus(t *testing.T) {
+func TestSet(t *testing.T) {
 
 	is := is.New(t)
-	db := api.UseMemDB
+	db := api.NewMemDB()
 	db.Set("IsHome", "value")
 	val, err := db.Get("IsHome")
 	if err != nil {
@@ -40,4 +41,32 @@ func TestSetStatus(t *testing.T) {
 		t.Error("IsHome should return a value")
 	}
 	is.Equal(val, true)
+}
+
+func TestNotify(t *testing.T) {
+
+	is := is.New(t)
+	db := api.NewMemDB()
+	notifyChan := db.Notify("IsHome")
+	notifyCount := 0
+	go func() {
+		for range notifyChan {
+			notifyCount += 1
+		}
+	}()
+
+	is.Equal(notifyCount, 0)
+
+	db.Set("IsHome", true)
+	time.Sleep(10 * time.Millisecond)
+	is.Equal(notifyCount, 1)
+
+	db.Set("IsHome", true)
+	time.Sleep(10 * time.Millisecond)
+	is.Equal(notifyCount, 1)
+
+	db.Set("IsHome", false)
+	time.Sleep(10 * time.Millisecond)
+	is.Equal(notifyCount, 2)
+
 }
