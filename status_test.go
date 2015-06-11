@@ -1,18 +1,18 @@
-package api_test
+package main
 
 import (
 	"github.com/abaril/GoLights/api"
 	"github.com/cheekybits/is"
-	"testing"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
 	"strings"
+	"testing"
 )
 
 func TestServeHTTP(t *testing.T) {
 
 	is := is.New(t)
-	s := api.InitStatusAPI(api.UseMemDB)
+	s := InitStatusAPI(api.UseMemDB)
 
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -25,4 +25,3 @@ func TestServeHTTP(t *testing.T) {
 	s(w, r)
 	is.Equal(w.Code, 404)
 }
-

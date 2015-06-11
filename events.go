@@ -1,12 +1,10 @@
 package main
 
-
 type TriggerFunc func(chan<- interface{})
 
 type ConditionFunc func() bool
 
 type ActionFunc func()
-
 
 func When(trigger TriggerFunc, condition ConditionFunc, action ActionFunc) {
 
@@ -16,11 +14,10 @@ func When(trigger TriggerFunc, condition ConditionFunc, action ActionFunc) {
 		for {
 			select {
 			case <-events:
-				if condition() {
+				if condition == nil || condition() {
 					action()
 				}
 			}
 		}
 	}()
 }
-

@@ -1,8 +1,9 @@
 package api_test
+
 import (
-	"testing"
-	"github.com/cheekybits/is"
 	"github.com/abaril/GoLights/api"
+	"github.com/cheekybits/is"
+	"testing"
 	"time"
 )
 

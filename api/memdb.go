@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 )
 
@@ -15,23 +16,23 @@ type MemDB interface {
 
 func NewMemDB() *storage {
 	return &storage{
-		data: make(map[string]interface{}),
+		data:          make(map[string]interface{}),
 		notifications: make(map[string]chan bool),
-		mutex: sync.RWMutex{},
+		mutex:         sync.RWMutex{},
 	}
 }
 
 var UseMemDB MemDB = &storage{
-	data: make(map[string]interface{}),
+	data:          make(map[string]interface{}),
 	notifications: make(map[string]chan bool),
-	mutex: sync.RWMutex{},
+	mutex:         sync.RWMutex{},
 }
 
 type storage struct {
-	data map[string]interface{}
+	data          map[string]interface{}
 	notifications map[string]chan bool
 
-	mutex   sync.RWMutex
+	mutex sync.RWMutex
 }
 
 func (s *storage) Get(key string) (interface{}, error) {
@@ -50,7 +51,7 @@ func (s *storage) Set(key string, value interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.data[key] == value {
+	if reflect.TypeOf(value).Comparable() && s.data[key] == value {
 		return
 	}
 	s.data[key] = value
@@ -67,5 +68,3 @@ func (s *storage) Notify(key string) chan bool {
 	s.notifications[key] = make(chan bool)
 	return s.notifications[key]
 }
-
-

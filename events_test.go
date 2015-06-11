@@ -1,12 +1,12 @@
 package main
 
 import (
-	"testing"
 	"github.com/cheekybits/is"
+	"testing"
 	"time"
 )
 
-func TestWhen(t * testing.T) {
+func TestWhen(t *testing.T) {
 
 	is := is.New(t)
 	actionCalls := 0

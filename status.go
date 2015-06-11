@@ -1,18 +1,21 @@
-package api
+package main
 
 import (
 	"encoding/json"
+	"github.com/abaril/GoLights/api"
 	"net/http"
+	"time"
 )
 
 type status struct {
-	IsAlive bool `json:"is_alive"`
-	IsHome  bool `json:"is_home"`
+	IsAlive   bool       `json:"is_alive"`
+	IsHome    bool       `json:"is_home"`
+	NextAlarm *time.Time `json:"next_alarm,omitempty"`
 }
 
-var db MemDB
+var db api.MemDB
 
-func InitStatusAPI(dbVal MemDB) http.HandlerFunc {
+func InitStatusAPI(dbVal api.MemDB) http.HandlerFunc {
 	db = dbVal
 	db.Set("IsHome", false)
 	return serveStatus
@@ -31,6 +34,12 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.IsHome = raw.(bool)
+
+		raw, err = db.Get("NextAlarm")
+		if err == nil {
+			time := raw.(time.Time)
+			s.NextAlarm = &time
+		}
 
 		json.NewEncoder(w).Encode(s)
 		return
