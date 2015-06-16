@@ -12,7 +12,7 @@ import (
 func TestServeHTTP(t *testing.T) {
 
 	is := is.New(t)
-	s := InitStatusAPI(api.UseMemDB)
+	s := InitStatusAPI(api.NewMemDB())
 
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()

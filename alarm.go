@@ -20,7 +20,7 @@ func NewAlarmExpired(db api.MemDB) ConditionFunc {
 	return func() bool {
 		raw, err := db.Get("NextAlarm")
 		if err != nil {
-			log.Println("Unable to get alarmTime", err)
+			// likely the alarm hasn't been configured
 			return false
 		}
 		alarm, ok := raw.(time.Time)
