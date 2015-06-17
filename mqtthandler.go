@@ -9,11 +9,11 @@ import (
 const RETRY_INTERVAL time.Duration = 10 * time.Second
 var handlers map[string]mqtt.MessageHandler = make(map[string]mqtt.MessageHandler)
 
-func mqttStart() {
+func mqttStart(broker string, clientId string) {
 	options := &mqtt.ClientOptions{
 		ClientID: "golights",
 	}
-	options.AddBroker("tcp://127.0.0.1:1883")
+	options.AddBroker(broker)
 	options.SetConnectionLostHandler(mqttConnect)
 	client := mqtt.NewClient(options)
 	go mqttConnect(client, nil)

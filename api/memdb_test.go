@@ -25,6 +25,18 @@ func TestGet(t *testing.T) {
 	is.Equal(val, true)
 }
 
+func TestGetOrDefault(t *testing.T) {
+
+	is := is.New(t)
+	db := api.NewMemDB()
+	val := db.GetOrDefault("IsSet", "no")
+	is.Equal(val, "no")
+
+	db.Set("IsSet", "YES!")
+	val = db.GetOrDefault("IsSet", "no")
+	is.Equal(val, "YES!")
+}
+
 func TestSet(t *testing.T) {
 
 	is := is.New(t)
@@ -42,6 +54,25 @@ func TestSet(t *testing.T) {
 		t.Error("IsHome should return a value")
 	}
 	is.Equal(val, true)
+}
+
+func TestRemove(t *testing.T) {
+
+	is := is.New(t)
+	db := api.NewMemDB()
+	db.Set("IsHome", "value")
+	val, err := db.Get("IsHome")
+	if err != nil {
+		t.Error("IsHome should return a value")
+	}
+	is.Equal(val, "value")
+
+	db.Remove("IsHome")
+	val, err = db.Get("IsHome")
+	if err == nil {
+		t.Error("IsHome should return an error")
+	}
+	is.Equal(err, api.ErrInvalidKey)
 }
 
 func TestNotify(t *testing.T) {

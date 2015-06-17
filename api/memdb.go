@@ -10,7 +10,9 @@ var ErrInvalidKey = errors.New("memdb: Invalid key provided")
 
 type MemDB interface {
 	Get(key string) (interface{}, error)
+	GetOrDefault(key string, defaultVal interface{}) interface{}
 	Set(key string, value interface{})
+	Remove(key string)
 	Notify(key string) chan bool
 }
 
@@ -46,6 +48,16 @@ func (s *storage) Get(key string) (interface{}, error) {
 	return "", ErrInvalidKey
 }
 
+func (s *storage) GetOrDefault(key string, defaultVal interface{}) interface{} {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if val, ok := s.data[key]; ok {
+		return val
+	}
+	return defaultVal
+}
+
 func (s *storage) Set(key string, value interface{}) {
 
 	s.mutex.Lock()
@@ -55,6 +67,19 @@ func (s *storage) Set(key string, value interface{}) {
 		return
 	}
 	s.data[key] = value
+	if notify, ok := s.notifications[key]; ok {
+		notify <- true
+	}
+}
+
+func (s *storage) Remove(key string) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if _, ok := s.data[key]; !ok {
+		return
+	}
+	delete(s.data, key)
 	if notify, ok := s.notifications[key]; ok {
 		notify <- true
 	}

@@ -6,34 +6,64 @@ import (
 	"net/http"
 	"time"
 	"log"
-	"net"
+	"flag"
+	"os"
+	"strings"
 )
 
 func main() {
 
-	// TODO: move this data into config
-	ll := lights.NewLights("192.168.1.105", "allanbaril")
+	db := api.UseMemDB
+	configHandler := retrieveBaseConfiguration(db)
 
-	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(api.UseMemDB), NewAlarmHandler(ll, api.UseMemDB))
+	var err error;
+	var hueAddress interface{};
+	var hueUsername interface{};
+	if hueAddress, err = db.Get("HueAddress"); err != nil {
+		log.Fatalln("Unable to retrieve configuration")
+	}
+	if hueUsername, err = db.Get("HueUsername"); err != nil {
+		log.Fatalln("Unable to retrieve configuration")
+	}
+
+	ll := lights.NewLights(hueAddress.(string), hueUsername.(string))
+
+	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(db), NewAlarmHandler(ll, db))
 	When(DimLightsTrigger, nil, NewDimLightsAction(ll, api.UseMemDB))
 
-	serverAddr, err := net.ResolveUDPAddr("udp",":8080")
-	if err != nil {
-		log.Fatalln("Unable to register UDP port")
-	}
-
-	serverConn, err := net.ListenUDP("udp", serverAddr)
-	if err != nil {
-		log.Fatalln("Unable to listen on UDP")
-	}
-	defer serverConn.Close()
-
-	http.HandleFunc("/api/v1/status", InitStatusAPI(api.UseMemDB))
-	http.HandleFunc("/api/v1/config", InitConfigAPI(api.UseMemDB))
-	http.HandleFunc("/api/v1/dimlights", InitDimLightsAPI(api.UseMemDB))
-
+	mqttBroker := db.GetOrDefault("MqttBrokerAddress", "tcp://127.0.0.1:1883")
 	mqttHandleFunc("/dimlights", handleMQTTDimLights)
-	mqttStart()
+	mqttStart(mqttBroker.(string), "golights")
 
-	http.ListenAndServe(":8080", http.DefaultServeMux)
+	httpBindAddress := db.GetOrDefault("HttpBindAddress", ":8080");
+	http.HandleFunc("/api/v1/status", InitStatusAPI(db))
+	http.HandleFunc("/api/v1/config", configHandler)
+	http.HandleFunc("/api/v1/dimlights", InitDimLightsAPI(db))
+	http.ListenAndServe(httpBindAddress.(string), http.DefaultServeMux)
+}
+
+// TODO: create a config "object" and move this functionality there
+func retrieveBaseConfiguration(db api.MemDB) http.HandlerFunc {
+
+	configHandler := InitConfigAPI(db)
+
+	env := os.Getenv("GOLIGHTS_CONFIG")
+	if len(env) > 0 {
+		if err := updateFromReader(strings.NewReader(env), true); err != nil {
+			log.Println("Unable to parse configuration from environment variable GOLIGHTS_CONFIG")
+		}
+	}
+
+	hueAddress := flag.String("ha", "", "Hue address")
+	hueUsername := flag.String("hu", "", "Hue username")
+	flag.Parse()
+
+	if len(*hueAddress) > 0 {
+		db.Set("HueAddress", *hueAddress)
+	}
+	if len(*hueUsername) > 0 {
+		db.Set("HueUsername", *hueUsername)
+	}
+
+	return configHandler;
 }
