@@ -15,10 +15,10 @@ type WeatherSettings struct {
 }
 
 type WeatherForecast struct {
-	Time uint64 `json:"time"`
+	Time Timestamp `json:"time"`
 	Summary string `json:"summary"`
-	SunriseTime uint64 `json:"sunriseTime"`
-	SunsetTime uint64 `json:"sunsetTime"`
+	SunriseTime Timestamp `json:"sunriseTime"`
+	SunsetTime Timestamp `json:"sunsetTime"`
 	PrecipProbability float32 `json:"precipProbability"`
 	TemperatureMin float32 `json:"temperatureMin"`
 	TemperatureMax float32 `json:"temperatureMax"`
