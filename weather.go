@@ -81,9 +81,15 @@ func NewPerformWeatherPoll(db api.MemDB) ActionFunc {
 		}
 
 		if len(forecast.Daily.Data) > 0 {
+			forecast.Daily.Data[0].TemperatureMin = fahrenheitToCelcius(forecast.Daily.Data[0].TemperatureMin)
+			forecast.Daily.Data[0].TemperatureMax = fahrenheitToCelcius(forecast.Daily.Data[0].TemperatureMax)
 			db.Set("Weather", forecast.Daily.Data[0])
 		}
 	}
+}
+
+func fahrenheitToCelcius(f float32) float32 {
+	return (f - 32) / 1.8
 }
 
 func (w *WeatherSettings)determineRequestURL() string {
