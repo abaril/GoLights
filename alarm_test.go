@@ -47,24 +47,33 @@ func TestUpdateNextAlarm(t *testing.T) {
 	is := is.New(t)
 	db := api.NewMemDB()
 
-	now := time.Now()
-	now = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+	now := time.Date(2015, 6, 16, 8, 0, 0, 0, time.Local)
 
 	alarm := now.Add(-1 * time.Hour)
 	db.Set("AlarmTime", alarm)
-	UpdateNextAlarm(db)
+	UpdateNextAlarm(db, now)
 	raw, err := db.Get("NextAlarm")
 	if err != nil {
 		t.Fatal("Unable to retrieve nextAlarm")
 	}
-	is.Equal(raw.(time.Time), alarm.Add(24*time.Hour))
+	is.Equal(raw.(time.Time), alarm.AddDate(0, 0, 1))
 
 	alarm = now.Add(1 * time.Hour)
 	db.Set("AlarmTime", alarm)
-	UpdateNextAlarm(db)
+	UpdateNextAlarm(db, now)
 	raw, err = db.Get("NextAlarm")
 	if err != nil {
 		t.Fatal("Unable to retrieve nextAlarm")
 	}
 	is.Equal(raw.(time.Time), alarm)
+
+	now = time.Date(2015, 6, 19, 8, 0, 0, 0, time.Local)
+	alarm = now.Add(-1 * time.Hour)
+	db.Set("AlarmTime", alarm)
+	UpdateNextAlarm(db, now)
+	raw, err = db.Get("NextAlarm")
+	if err != nil {
+		t.Fatal("Unable to retrieve nextAlarm")
+	}
+	is.Equal(raw.(time.Time), alarm.AddDate(0, 0, 3))
 }

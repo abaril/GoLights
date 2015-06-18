@@ -36,7 +36,7 @@ func NewAlarmExpired(db api.MemDB) ConditionFunc {
 func NewAlarmHandler(ll *lights.Lights, db api.MemDB) ActionFunc {
 	return func() {
 		log.Println("Alarm triggered!")
-		UpdateNextAlarm(db)
+		UpdateNextAlarm(db, time.Now())
 
 		raw, err := db.Get("AlarmLights")
 		if err != nil {
@@ -51,7 +51,7 @@ func NewAlarmHandler(ll *lights.Lights, db api.MemDB) ActionFunc {
 	}
 }
 
-func UpdateNextAlarm(db api.MemDB) {
+func UpdateNextAlarm(db api.MemDB, now time.Time) {
 	raw, err := db.Get("AlarmTime")
 	if err != nil {
 		log.Println("Unable to retrieve alarmTime. Ensure configuration is correct")
@@ -62,10 +62,12 @@ func UpdateNextAlarm(db api.MemDB) {
 		log.Fatalln("Invalid config value")
 	}
 
-	now := time.Now()
 	nextAlarm := time.Date(now.Year(), now.Month(), now.Day(), alarm.Hour(), alarm.Minute(), 0, 0, now.Location())
 	if nextAlarm.Before(now) {
 		nextAlarm = nextAlarm.AddDate(0, 0, 1)
+		for nextAlarm.Weekday() == time.Saturday || nextAlarm.Weekday() == time.Sunday {
+			nextAlarm = nextAlarm.AddDate(0, 0, 1)
+		}
 	}
 	db.Set("NextAlarm", nextAlarm)
 }

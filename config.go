@@ -125,7 +125,7 @@ func updateFromReader(reader io.Reader, skipEmpty bool) error {
 
 	if timeVal, err := time.Parse("15:04", newConfig.AlarmTime); err == nil {
 		updateDatabase("AlarmTime", timeVal, skipEmpty)
-		UpdateNextAlarm(db)
+		UpdateNextAlarm(db, time.Now())
 	}
 	updateDatabase("AlarmLights", newConfig.AlarmLights, skipEmpty)
 
