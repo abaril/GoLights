@@ -10,6 +10,7 @@ import (
 	"io"
 )
 
+// TODO: this is a bit weird, can we merge structs? Perhaps we store pointers in the db? Is that a good idea?
 type configOut struct {
 	HueAddress  string `json:"hue_address,omitempty"`
 	HueUsername string `json:"hue_username,omitempty"`
@@ -17,6 +18,9 @@ type configOut struct {
 	MqttBrokerAddress string `json:"mqtt_broker,omitempty"`
 	AlarmTime   string `json:"alarm_time,omitempty"`
 	AlarmLights []int  `json:"alarm_lights,omitempty"`
+	WeatherApiKey string `json:"weather_api_key,omitempty"`
+	WeatherLat float32 `json:"weather_lat,omitempty"`
+	WeatherLon float32 `json:"weather_lon,omitempty"`
 }
 
 type configIn struct {
@@ -26,6 +30,9 @@ type configIn struct {
 	MqttBrokerAddress *string `json:"mqtt_broker"`
 	AlarmTime   string `json:"alarm_time"`
 	AlarmLights *[]int  `json:"alarm_lights"`
+	WeatherApiKey *string `json:"weather_api_key"`
+	WeatherLat *float32 `json:"weather_lat"`
+	WeatherLon *float32 `json:"weather_lon"`
 }
 
 
@@ -81,6 +88,13 @@ func performGET(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		c.AlarmLights = raw.([]int)
 	}
+	raw, err = db.Get("WeatherSettings")
+	if err == nil {
+		w := raw.(*WeatherSettings)
+		c.WeatherApiKey = w.Key
+		c.WeatherLat = w.Lat
+		c.WeatherLon = w.Lon
+	}
 
 	json.NewEncoder(w).Encode(c)
 }
@@ -114,6 +128,24 @@ func updateFromReader(reader io.Reader, skipEmpty bool) error {
 		UpdateNextAlarm(db)
 	}
 	updateDatabase("AlarmLights", newConfig.AlarmLights, skipEmpty)
+
+	w := &WeatherSettings{}
+	if skipEmpty {
+		if raw, err := db.Get("WeatherSettings"); err == nil {
+			w = raw.(*WeatherSettings)
+		}
+	}
+	if newConfig.WeatherApiKey != nil {
+		w.Key = *newConfig.WeatherApiKey
+	}
+	if newConfig.WeatherLat != nil {
+		w.Lat = *newConfig.WeatherLat
+	}
+	if newConfig.WeatherLon != nil {
+		w.Lon = *newConfig.WeatherLon
+	}
+	db.Set("WeatherSettings", w)
+
 	return nil
 }
 

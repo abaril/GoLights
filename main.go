@@ -29,7 +29,8 @@ func main() {
 	ll := lights.NewLights(hueAddress.(string), hueUsername.(string))
 
 	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(db), NewAlarmHandler(ll, db))
-	When(DimLightsTrigger, nil, NewDimLightsAction(ll, api.UseMemDB))
+	When(DimLightsTrigger, nil, NewDimLightsAction(ll, db))
+	When(NewAlarmTrigger(10*time.Minute), NewCheckIfPollWeather(db), NewPerformWeatherPoll(db))
 
 	mqttBroker := db.GetOrDefault("MqttBrokerAddress", "tcp://127.0.0.1:1883")
 	mqttHandleFunc("/dimlights", handleMQTTDimLights)
