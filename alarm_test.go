@@ -77,3 +77,48 @@ func TestUpdateNextAlarm(t *testing.T) {
 	}
 	is.Equal(raw.(time.Time), alarm.AddDate(0, 0, 3))
 }
+
+func TestDetermineLightColour(t *testing.T) {
+
+	is := is.New(t)
+	db := api.NewMemDB()
+
+	w := WeatherForecast{
+		PrecipProbability: 0.5,
+	}
+	db.Set("Weather", w)
+	hue, sat := determineLightColour(db)
+	is.Equal(hue, BLUE_H)
+	is.Equal(sat, BLUE_S)
+
+	w = WeatherForecast{
+		PrecipProbability: 0.0,
+		TemperatureMin: -20,
+		TemperatureMax: -10,
+	}
+	db.Set("Weather", w)
+	hue, sat = determineLightColour(db)
+	is.Equal(hue, WHITE_H)
+	is.Equal(sat, WHITE_S)
+
+	w = WeatherForecast{
+		PrecipProbability: 0.0,
+		TemperatureMin: 10,
+		TemperatureMax: 30,
+	}
+	db.Set("Weather", w)
+	hue, sat = determineLightColour(db)
+	is.Equal(hue, RED_H)
+	is.Equal(sat, RED_S)
+
+	w = WeatherForecast{
+		PrecipProbability: 0.0,
+		TemperatureMin: 10,
+		TemperatureMax: 20,
+	}
+	db.Set("Weather", w)
+	hue, sat = determineLightColour(db)
+	is.Equal(hue, YELLOW_H)
+	is.Equal(sat, YELLOW_S)
+
+}

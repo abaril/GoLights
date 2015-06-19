@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+const (
+	RED_H = uint16(5482)
+	RED_S = uint8(192)
+	WHITE_H = uint16(35831)
+	WHITE_S = uint8(254)
+	BLUE_H = uint16(44538)
+	BLUE_S = uint8(252)
+	YELLOW_H = uint16(23806)
+	YELLOW_S = uint8(208)
+)
+
 func NewAlarmTrigger(interval time.Duration) TriggerFunc {
 	return func(events chan<- interface{}) {
 		tc := time.Tick(interval)
@@ -46,9 +57,34 @@ func NewAlarmHandler(ll *lights.Lights, db api.MemDB) ActionFunc {
 		alarmLights := raw.([]int)
 		for _, light := range alarmLights {
 			log.Println("Turning on light", light)
-			ll.SetLightState(light, lights.State{On: true, Bri: 200})
+			hue, sat := determineLightColour(db)
+			ll.SetLightState(light, lights.State{
+				On: true,
+				Bri: 254,
+				Hue: hue,
+				Sat: sat,
+				TransitionTime:100,
+			})
 		}
 	}
+}
+
+func determineLightColour(db api.MemDB) (uint16, uint8) {
+	raw, err := db.Get("Weather")
+	if err == nil {
+		w := raw.(WeatherForecast)
+
+		if w.PrecipProbability > 0.2 {
+			return BLUE_H, BLUE_S
+		}
+		if w.TemperatureMin < -5.0 {
+			return WHITE_H, WHITE_S
+		}
+		if w.TemperatureMax > 25.0 {
+			return RED_H, RED_S
+		}
+	}
+	return YELLOW_H, YELLOW_S
 }
 
 func UpdateNextAlarm(db api.MemDB, now time.Time) {
