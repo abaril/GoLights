@@ -21,6 +21,8 @@ type configOut struct {
 	WeatherApiKey string `json:"weather_api_key,omitempty"`
 	WeatherLat float32 `json:"weather_lat,omitempty"`
 	WeatherLon float32 `json:"weather_lon,omitempty"`
+	DetectUserIP string `json:"detect_user_ip,omitempty"`
+	LightsOnArrival []int `json:"lights_on_arrival,omitempty"`
 }
 
 type configIn struct {
@@ -33,6 +35,8 @@ type configIn struct {
 	WeatherApiKey *string `json:"weather_api_key"`
 	WeatherLat *float32 `json:"weather_lat"`
 	WeatherLon *float32 `json:"weather_lon"`
+	DetectUserIP *string `json:"detect_user_ip"`
+	LightsOnArrival *[]int `json:"lights_on_arrival"`
 }
 
 
@@ -95,6 +99,12 @@ func performGET(w http.ResponseWriter, r *http.Request) {
 		c.WeatherLat = w.Lat
 		c.WeatherLon = w.Lon
 	}
+	if raw, err = db.Get("DetectUserIP"); err == nil {
+		c.DetectUserIP = raw.(string)
+	}
+	if raw, err = db.Get("LightsOnArrival"); err == nil {
+		c.LightsOnArrival = raw.([]int)
+	}
 
 	json.NewEncoder(w).Encode(c)
 }
@@ -128,6 +138,8 @@ func updateFromReader(reader io.Reader, skipEmpty bool) error {
 		UpdateNextAlarm(db, time.Now())
 	}
 	updateDatabase("AlarmLights", newConfig.AlarmLights, skipEmpty)
+	updateDatabase("DetectUserIP", newConfig.DetectUserIP, skipEmpty)
+	updateDatabase("LightsOnArrival", newConfig.LightsOnArrival, skipEmpty)
 
 	w := &WeatherSettings{}
 	if skipEmpty {

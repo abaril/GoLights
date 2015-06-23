@@ -38,8 +38,13 @@ func TestAlarmExpired(t *testing.T) {
 	db.Set("NextAlarm", time.Now().Add(+1*time.Minute))
 	is.Equal(f(), false)
 
+	db.Set("IsHome", true)
 	db.Set("NextAlarm", time.Now().Add(-1*time.Minute))
 	is.Equal(f(), true)
+
+	db.Set("IsHome", false)
+	db.Set("NextAlarm", time.Now().Add(-1*time.Minute))
+	is.Equal(f(), false)
 }
 
 func TestUpdateNextAlarm(t *testing.T) {

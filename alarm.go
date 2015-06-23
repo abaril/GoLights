@@ -29,7 +29,15 @@ func NewAlarmTrigger(interval time.Duration) TriggerFunc {
 
 func NewAlarmExpired(db api.MemDB) ConditionFunc {
 	return func() bool {
-		raw, err := db.Get("NextAlarm")
+		raw, err := db.Get("IsHome")
+		if err != nil {
+			return false
+		}
+		if isHome, ok := raw.(bool); !ok || !isHome {
+			return false
+		}
+
+		raw, err = db.Get("NextAlarm")
 		if err != nil {
 			// likely the alarm hasn't been configured
 			return false
