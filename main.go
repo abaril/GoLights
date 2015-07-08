@@ -29,7 +29,6 @@ func main() {
 	ll := lights.NewLights(hueAddress.(string), hueUsername.(string))
 
 	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(db), NewAlarmHandler(ll, db))
-	When(DimLightsTrigger, nil, NewDimLightsAction(ll, db))
 	When(NewAlarmTrigger(10*time.Minute), NewCheckIfPollWeather(db), NewPerformWeatherPoll(db))
 	When(NewUserTrigger(db), nil, NewAtHomeChangedHandler(ll, db))
 
@@ -40,7 +39,7 @@ func main() {
 	httpBindAddress := db.GetOrDefault("HttpBindAddress", ":8080");
 	http.HandleFunc("/api/v1/status", InitStatusAPI(db))
 	http.HandleFunc("/api/v1/config", configHandler)
-	http.HandleFunc("/api/v1/dimlights", InitDimLightsAPI(db))
+	http.HandleFunc("/api/v1/dimlights", InitDimLightsAPI(ll))
 	http.ListenAndServe(httpBindAddress.(string), http.DefaultServeMux)
 }
 

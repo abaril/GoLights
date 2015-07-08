@@ -2,7 +2,6 @@ package main
 import (
 	"testing"
 	"github.com/cheekybits/is"
-	"github.com/abaril/GoLights/api"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +10,7 @@ import (
 func TestServeDimLights(t *testing.T) {
 
 	is := is.New(t)
-	s := InitDimLightsAPI(api.NewMemDB())
+	s := InitDimLightsAPI(nil)
 
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()

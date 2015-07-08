@@ -1,6 +1,5 @@
 package main
 import (
-	"github.com/abaril/GoLights/api"
 	"net/http"
 	"encoding/json"
 	"log"
@@ -14,8 +13,10 @@ type DimLights struct {
 	Lights []int  `json:"lights"`
 }
 
-func InitDimLightsAPI(dbVal api.MemDB) http.HandlerFunc {
-	db = dbVal
+var lightsService *lights.Lights
+
+func InitDimLightsAPI(ll *lights.Lights) http.HandlerFunc {
+	lightsService = ll
 	return serveDimLights
 }
 
@@ -23,19 +24,19 @@ func serveDimLights(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "POST":
-		var settings DimLights
-		if err := json.NewDecoder(r.Body).Decode(&settings); err != nil {
+		var request DimLights
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			log.Println("Err", err)
 			http.Error(w, http.StatusText(406), 406)
 			return
 		}
 		r.Body.Close()
 
-		db.Set("DimLights", settings)
+		dimLightsAction(lightsService, request)
 
 		w.Header().Set("Location", "api/v1/dimlights")
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(settings)
+		json.NewEncoder(w).Encode(request)
 
 		return
 	}
@@ -44,41 +45,29 @@ func serveDimLights(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMQTTDimLights(client *mqtt.Client, message mqtt.Message) {
-	var settings DimLights
-	if err := json.NewDecoder(bytes.NewReader(message.Payload())).Decode(&settings); err != nil {
+	var request DimLights
+	if err := json.NewDecoder(bytes.NewReader(message.Payload())).Decode(&request); err != nil {
 		log.Println("Err", err)
 		return
 	}
 
-	db.Set("DimLights", settings)
+	dimLightsAction(lightsService, request)
 }
 
-func DimLightsTrigger(events chan<- interface{}) {
-	changed := db.Notify("DimLights")
-	for range changed {
-		events <- true
-	}
-}
-
-func NewDimLightsAction(ll *lights.Lights, db api.MemDB) ActionFunc {
-	return func() {
-		raw, err := db.Get("DimLights")
-		if err != nil {
-			log.Println("Unable to retrieve dimLights settings:", err)
-			return
-		}
-		settings := raw.(DimLights)
-		for _, light := range settings.Lights {
-			if settings.Level == 0 {
+func dimLightsAction(ll *lights.Lights, request DimLights)  {
+	for _, light := range request.Lights {
+		if request.Level == 0 {
+			if ll != nil {
 				ll.SetLightState(light, lights.State{On: false})
-			} else {
-				var brightness uint8 = uint8(255.0 * settings.Level/10.0)
-				log.Println("Dimming light", light, "to", brightness)
+			}
+		} else {
+			var brightness uint8 = uint8(255.0 * request.Level/10.0)
+			log.Println("Dimming light", light, "to", brightness)
+			if ll != nil {
 				ll.SetLightState(light, lights.State{On: true, Bri: brightness})
 			}
 		}
 	}
-
 }
 
 
