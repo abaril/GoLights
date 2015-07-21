@@ -16,6 +16,8 @@ func main() {
 	db := api.UseMemDB
 	configHandler := retrieveBaseConfiguration(db)
 
+	log.Println("Starting GoLights v1.0")
+
 	var err error;
 	var hueAddress interface{};
 	var hueUsername interface{};
