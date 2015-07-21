@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 	"log"
-	"github.com/heatxsink/go-hue/src/lights"
+	"github.com/abaril/go-hue/src/lights"
 	"github.com/abaril/GoLights/api"
 )
 

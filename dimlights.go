@@ -5,7 +5,7 @@ import (
 	"log"
 	"git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
 	"bytes"
-	"github.com/heatxsink/go-hue/src/lights"
+	"github.com/abaril/go-hue/src/lights"
 )
 
 type DimLights struct {

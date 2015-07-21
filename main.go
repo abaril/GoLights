@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/abaril/GoLights/api"
-	"github.com/heatxsink/go-hue/src/lights"
+	"github.com/abaril/go-hue/src/lights"
 	"net/http"
 	"time"
 	"log"
