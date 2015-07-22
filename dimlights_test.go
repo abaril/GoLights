@@ -28,3 +28,20 @@ func TestServeDimLights(t *testing.T) {
 	is.Equal(w.Code, 202)
 	is.Equal(strings.TrimSpace(w.Body.String()), "{\"level\":1,\"lights\":[3]}")
 }
+
+func TestRestoreLastLevel(t *testing.T) {
+
+	is := is.New(t)
+	InitDimLightsAPI(nil)
+
+	var level float64
+	level = restoreLastLevel(4, 5.0)
+	is.Equal(level, 5.0)
+
+	saveLastLevel(4, 3.0)
+	level = restoreLastLevel(4, 5.0)
+	is.Equal(level, 3.0)
+
+	level = restoreLastLevel(4, 7.5)
+	is.Equal(level, 7.5)
+}

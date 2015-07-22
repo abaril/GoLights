@@ -6,17 +6,27 @@ import (
 	"git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
 	"bytes"
 	"github.com/abaril/go-hue/src/lights"
+	"strings"
+)
+
+const (
+	ACTION_SET = iota
+	ACTION_PUSH
+	ACTION_POP
 )
 
 type DimLights struct {
-	Level   int `json:"level"`
+	Level   float64 `json:"level"`
 	Lights []int  `json:"lights"`
+	State string `json:"state,omitempty"`
 }
 
 var lightsService *lights.Lights
+var pastLevels map[int][]float64
 
 func InitDimLightsAPI(ll *lights.Lights) http.HandlerFunc {
 	lightsService = ll
+	pastLevels = make(map[int][]float64)
 	return serveDimLights
 }
 
@@ -54,14 +64,54 @@ func handleMQTTDimLights(client *mqtt.Client, message mqtt.Message) {
 	dimLightsAction(lightsService, request)
 }
 
+func saveLastLevel(lightId int, level float64) {
+	log.Println("Saving", lightId, level)
+	pastLevels[lightId] = append(pastLevels[lightId], level)
+}
+
+func restoreLastLevel(lightId int, defaultLevel float64) float64 {
+	level := defaultLevel
+	if pastLevels[lightId] != nil {
+		stack := pastLevels[lightId]
+		if len(stack) > 0 {
+			level, pastLevels[lightId] = stack[len(stack)-1], stack[:len(stack)-1]
+		}
+	}
+	return level
+}
+
 func dimLightsAction(ll *lights.Lights, request DimLights)  {
+	action := ACTION_SET
+	var allLights []lights.Light
+
+	if len(request.State) > 0 {
+		switch strings.ToLower(request.State) {
+		case "push":
+			allLights = ll.GetAllLights()
+			log.Println("All lights", allLights)
+			action = ACTION_PUSH
+		case "pop":
+			action = ACTION_POP
+		}
+	}
+
 	for _, light := range request.Lights {
-		if request.Level == 0 {
+		level := request.Level
+		if action == ACTION_PUSH {
+			for _, lightState := range allLights {
+				saveLastLevel(lightState.Id, (float64(lightState.State.Bri) / 255.0) * 10.0)
+				break
+			}
+		} else if action == ACTION_POP {
+			level = restoreLastLevel(light, request.Level)
+		}
+
+		if level == 0 {
 			if ll != nil {
 				ll.SetLightState(light, lights.State{On: false})
 			}
 		} else {
-			var brightness uint8 = uint8(255.0 * request.Level/10.0)
+			var brightness uint8 = uint8(255.0 * level/10.0)
 			log.Println("Dimming light", light, "to", brightness)
 			if ll != nil {
 				ll.SetLightState(light, lights.State{On: true, Bri: brightness})
