@@ -59,6 +59,7 @@ func retrieveBaseConfiguration(db api.MemDB) http.HandlerFunc {
 
 	hueAddress := flag.String("ha", "", "Hue address")
 	hueUsername := flag.String("hu", "", "Hue username")
+	mqttBroker := flag.String("mqtt", "", "MQTT broker")
 	flag.Parse()
 
 	if len(*hueAddress) > 0 {
@@ -66,6 +67,9 @@ func retrieveBaseConfiguration(db api.MemDB) http.HandlerFunc {
 	}
 	if len(*hueUsername) > 0 {
 		db.Set("HueUsername", *hueUsername)
+	}
+	if len(*mqttBroker) > 0 {
+		db.Set("MqttBrokerAddress", *mqttBroker)
 	}
 
 	return configHandler;

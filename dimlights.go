@@ -65,7 +65,6 @@ func handleMQTTDimLights(client *mqtt.Client, message mqtt.Message) {
 }
 
 func saveLastLevel(lightId int, level float64) {
-	log.Println("Saving", lightId, level)
 	pastLevels[lightId] = append(pastLevels[lightId], level)
 }
 
@@ -88,7 +87,6 @@ func dimLightsAction(ll *lights.Lights, request DimLights)  {
 		switch strings.ToLower(request.State) {
 		case "push":
 			allLights = ll.GetAllLights()
-			log.Println("All lights", allLights)
 			action = ACTION_PUSH
 		case "pop":
 			action = ACTION_POP
@@ -99,8 +97,14 @@ func dimLightsAction(ll *lights.Lights, request DimLights)  {
 		level := request.Level
 		if action == ACTION_PUSH {
 			for _, lightState := range allLights {
-				saveLastLevel(lightState.Id, (float64(lightState.State.Bri) / 255.0) * 10.0)
-				break
+				if lightState.Id == light {
+					currentLevel := 0.0
+					if lightState.State.On {
+						currentLevel = (float64(lightState.State.Bri) / 255.0) * 10.0
+					}
+					saveLastLevel(lightState.Id, currentLevel)
+					break
+				}
 			}
 		} else if action == ACTION_POP {
 			level = restoreLastLevel(light, request.Level)
