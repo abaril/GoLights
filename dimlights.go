@@ -1,11 +1,12 @@
 package main
+
 import (
-	"net/http"
-	"encoding/json"
-	"log"
-	"git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
 	"bytes"
+	"encoding/json"
+	"git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
 	"github.com/abaril/go-hue/src/lights"
+	"log"
+	"net/http"
 	"strings"
 )
 
@@ -16,9 +17,9 @@ const (
 )
 
 type DimLights struct {
-	Level   float64 `json:"level"`
-	Lights []int  `json:"lights"`
-	State string `json:"state,omitempty"`
+	Level  float64 `json:"level"`
+	Lights []int   `json:"lights"`
+	State  string  `json:"state,omitempty"`
 }
 
 var lightsService *lights.Lights
@@ -79,7 +80,7 @@ func restoreLastLevel(lightId int, defaultLevel float64) float64 {
 	return level
 }
 
-func dimLightsAction(ll *lights.Lights, request DimLights)  {
+func dimLightsAction(ll *lights.Lights, request DimLights) {
 	action := ACTION_SET
 	var allLights []lights.Light
 
@@ -115,7 +116,7 @@ func dimLightsAction(ll *lights.Lights, request DimLights)  {
 				ll.SetLightState(light, lights.State{On: false})
 			}
 		} else {
-			var brightness uint8 = uint8(255.0 * level/10.0)
+			var brightness uint8 = uint8(255.0 * level / 10.0)
 			log.Println("Dimming light", light, "to", brightness)
 			if ll != nil {
 				ll.SetLightState(light, lights.State{On: true, Bri: brightness})
@@ -123,6 +124,3 @@ func dimLightsAction(ll *lights.Lights, request DimLights)  {
 		}
 	}
 }
-
-
-

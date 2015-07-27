@@ -18,7 +18,7 @@ func TestServeHTTP(t *testing.T) {
 	w := httptest.NewRecorder()
 	s(w, r)
 	is.Equal(w.Code, 200)
-	is.Equal(strings.TrimSpace(w.Body.String()), "{\"is_alive\":true,\"is_home\":false}")
+	is.Equal(strings.TrimSpace(w.Body.String()), "{\"version\":\"1.0.2\",\"is_alive\":true,\"is_home\":false}")
 
 	r, _ = http.NewRequest("POST", "/", nil)
 	w = httptest.NewRecorder()

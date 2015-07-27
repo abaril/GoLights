@@ -1,10 +1,11 @@
 package main
+
 import (
-	"testing"
 	"github.com/cheekybits/is"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"testing"
 )
 
 func TestServeDimLights(t *testing.T) {

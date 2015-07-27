@@ -8,10 +8,11 @@ import (
 )
 
 type status struct {
-	IsAlive   bool       `json:"is_alive"`
-	IsHome    bool       `json:"is_home"`
-	NextAlarm *time.Time `json:"next_alarm,omitempty"`
-	Weather *WeatherForecast `json:"forecast,omitempty"`
+	Version   string           `json:"version"`
+	IsAlive   bool             `json:"is_alive"`
+	IsHome    bool             `json:"is_home"`
+	NextAlarm *time.Time       `json:"next_alarm,omitempty"`
+	Weather   *WeatherForecast `json:"forecast,omitempty"`
 }
 
 var db api.MemDB
@@ -27,6 +28,7 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		s := status{
+			Version: VERSION_STRING,
 			IsAlive: true,
 		}
 		raw, err := db.Get("IsHome")

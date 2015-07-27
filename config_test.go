@@ -1,11 +1,12 @@
 package main
+
 import (
-	"testing"
-	"github.com/cheekybits/is"
 	"github.com/abaril/GoLights/api"
+	"github.com/cheekybits/is"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"testing"
 )
 
 func TestServeConfigHTTP(t *testing.T) {
@@ -52,4 +53,3 @@ func TestServeConfigHTTP(t *testing.T) {
 	is.Equal(strings.TrimSpace(w.Body.String()), "{\"hue_username\":\"username2\",\"mqtt_broker\":\"tcp://127.0.0.1:1883\",\"alarm_time\":\"10:00\",\"alarm_lights\":[3,5]}")
 
 }
-

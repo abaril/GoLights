@@ -7,6 +7,7 @@ import (
 )
 
 const RETRY_INTERVAL time.Duration = 10 * time.Second
+
 var handlers map[string]mqtt.MessageHandler = make(map[string]mqtt.MessageHandler)
 
 func mqttStart(broker string, clientId string) {
@@ -26,8 +27,8 @@ func mqttConnect(client *mqtt.Client, err error) {
 
 	for !client.IsConnected() {
 
-		token := client.Connect();
-		token.Wait();
+		token := client.Connect()
+		token.Wait()
 		if token.Error() != nil {
 			log.Println("Unable to connect to MQTT broker", token.Error())
 		}

@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	RED_H = uint16(5482)
-	RED_S = uint8(192)
-	WHITE_H = uint16(35831)
-	WHITE_S = uint8(254)
-	BLUE_H = uint16(44538)
-	BLUE_S = uint8(252)
+	RED_H    = uint16(5482)
+	RED_S    = uint8(192)
+	WHITE_H  = uint16(35831)
+	WHITE_S  = uint8(254)
+	BLUE_H   = uint16(44538)
+	BLUE_S   = uint8(252)
 	YELLOW_H = uint16(23806)
 	YELLOW_S = uint8(208)
 )
@@ -67,11 +67,11 @@ func NewAlarmHandler(ll *lights.Lights, db api.MemDB) ActionFunc {
 			log.Println("Turning on light", light)
 			hue, sat := determineLightColour(db)
 			ll.SetLightState(light, lights.State{
-				On: true,
-				Bri: 254,
-				Hue: hue,
-				Sat: sat,
-				TransitionTime:100,
+				On:             true,
+				Bri:            254,
+				Hue:            hue,
+				Sat:            sat,
+				TransitionTime: 100,
 			})
 		}
 	}

@@ -1,8 +1,9 @@
 package main
+
 import (
-	"testing"
-	"github.com/cheekybits/is"
 	"github.com/abaril/GoLights/api"
+	"github.com/cheekybits/is"
+	"testing"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func TestNewCheckIfPollWeather(t *testing.T) {
 	is.Equal(f(), false)
 }
 
-func TestNewPerformWeatherPoll(t * testing.T) {
+func TestNewPerformWeatherPoll(t *testing.T) {
 
 	db := api.NewMemDB()
 	f := NewPerformWeatherPoll(db)
@@ -31,7 +32,7 @@ func TestNewPerformWeatherPoll(t * testing.T) {
 		Key: "<key needs to be provided to test>",
 		Lat: 43.6314075,
 		Lon: -79.3941305,
-	});
+	})
 	f()
 	_, err := db.Get("Weather")
 	if err != nil && validKey {

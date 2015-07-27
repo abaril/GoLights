@@ -98,8 +98,8 @@ func TestDetermineLightColour(t *testing.T) {
 
 	w = WeatherForecast{
 		PrecipProbability: 0.0,
-		TemperatureMin: -20,
-		TemperatureMax: -10,
+		TemperatureMin:    -20,
+		TemperatureMax:    -10,
 	}
 	db.Set("Weather", w)
 	hue, sat = determineLightColour(db)
@@ -108,8 +108,8 @@ func TestDetermineLightColour(t *testing.T) {
 
 	w = WeatherForecast{
 		PrecipProbability: 0.0,
-		TemperatureMin: 10,
-		TemperatureMax: 30,
+		TemperatureMin:    10,
+		TemperatureMax:    30,
 	}
 	db.Set("Weather", w)
 	hue, sat = determineLightColour(db)
@@ -118,8 +118,8 @@ func TestDetermineLightColour(t *testing.T) {
 
 	w = WeatherForecast{
 		PrecipProbability: 0.0,
-		TemperatureMin: 10,
-		TemperatureMax: 20,
+		TemperatureMin:    10,
+		TemperatureMax:    20,
 	}
 	db.Set("Weather", w)
 	hue, sat = determineLightColour(db)

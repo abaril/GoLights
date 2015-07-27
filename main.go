@@ -1,14 +1,18 @@
 package main
 
 import (
+	"flag"
 	"github.com/abaril/GoLights/api"
 	"github.com/abaril/go-hue/src/lights"
-	"net/http"
-	"time"
 	"log"
-	"flag"
+	"net/http"
 	"os"
 	"strings"
+	"time"
+)
+
+const (
+	VERSION_STRING = "1.0.2"
 )
 
 func main() {
@@ -16,11 +20,11 @@ func main() {
 	db := api.UseMemDB
 	configHandler := retrieveBaseConfiguration(db)
 
-	log.Println("Starting GoLights v1.0.1")
+	log.Println("Starting GoLights " + VERSION_STRING)
 
-	var err error;
-	var hueAddress interface{};
-	var hueUsername interface{};
+	var err error
+	var hueAddress interface{}
+	var hueUsername interface{}
 	if hueAddress, err = db.Get("HueAddress"); err != nil {
 		log.Fatalln("Unable to retrieve configuration")
 	}
@@ -38,7 +42,7 @@ func main() {
 	mqttHandleFunc("/dimlights", handleMQTTDimLights)
 	mqttStart(mqttBroker.(string), "golights")
 
-	httpBindAddress := db.GetOrDefault("HttpBindAddress", ":8080");
+	httpBindAddress := db.GetOrDefault("HttpBindAddress", ":8080")
 	http.HandleFunc("/api/v1/status", InitStatusAPI(db))
 	http.HandleFunc("/api/v1/config", configHandler)
 	http.HandleFunc("/api/v1/dimlights", InitDimLightsAPI(ll))
@@ -72,5 +76,5 @@ func retrieveBaseConfiguration(db api.MemDB) http.HandlerFunc {
 		db.Set("MqttBrokerAddress", *mqttBroker)
 	}
 
-	return configHandler;
+	return configHandler
 }

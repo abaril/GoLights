@@ -4,41 +4,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/abaril/GoLights/api"
+	"io"
 	"log"
 	"net/http"
 	"time"
-	"io"
 )
 
 // TODO: this is a bit weird, can we merge structs? Perhaps we store pointers in the db? Is that a good idea?
 type configOut struct {
-	HueAddress  string `json:"hue_address,omitempty"`
-	HueUsername string `json:"hue_username,omitempty"`
-	HttpBindAddress string `json:"http_address,omitempty"`
-	MqttBrokerAddress string `json:"mqtt_broker,omitempty"`
-	AlarmTime   string `json:"alarm_time,omitempty"`
-	AlarmLights []int  `json:"alarm_lights,omitempty"`
-	WeatherApiKey string `json:"weather_api_key,omitempty"`
-	WeatherLat float32 `json:"weather_lat,omitempty"`
-	WeatherLon float32 `json:"weather_lon,omitempty"`
-	DetectUserIP string `json:"detect_user_ip,omitempty"`
-	LightsOnArrival []int `json:"lights_on_arrival,omitempty"`
+	HueAddress        string  `json:"hue_address,omitempty"`
+	HueUsername       string  `json:"hue_username,omitempty"`
+	HttpBindAddress   string  `json:"http_address,omitempty"`
+	MqttBrokerAddress string  `json:"mqtt_broker,omitempty"`
+	AlarmTime         string  `json:"alarm_time,omitempty"`
+	AlarmLights       []int   `json:"alarm_lights,omitempty"`
+	WeatherApiKey     string  `json:"weather_api_key,omitempty"`
+	WeatherLat        float32 `json:"weather_lat,omitempty"`
+	WeatherLon        float32 `json:"weather_lon,omitempty"`
+	DetectUserIP      string  `json:"detect_user_ip,omitempty"`
+	LightsOnArrival   []int   `json:"lights_on_arrival,omitempty"`
 }
 
 type configIn struct {
-	HueAddress  *string `json:"hue_address"`
-	HueUsername *string `json:"hue_username"`
-	HttpBindAddress *string `json:"http_address"`
-	MqttBrokerAddress *string `json:"mqtt_broker"`
-	AlarmTime   string `json:"alarm_time"`
-	AlarmLights *[]int  `json:"alarm_lights"`
-	WeatherApiKey *string `json:"weather_api_key"`
-	WeatherLat *float32 `json:"weather_lat"`
-	WeatherLon *float32 `json:"weather_lon"`
-	DetectUserIP *string `json:"detect_user_ip"`
-	LightsOnArrival *[]int `json:"lights_on_arrival"`
+	HueAddress        *string  `json:"hue_address"`
+	HueUsername       *string  `json:"hue_username"`
+	HttpBindAddress   *string  `json:"http_address"`
+	MqttBrokerAddress *string  `json:"mqtt_broker"`
+	AlarmTime         string   `json:"alarm_time"`
+	AlarmLights       *[]int   `json:"alarm_lights"`
+	WeatherApiKey     *string  `json:"weather_api_key"`
+	WeatherLat        *float32 `json:"weather_lat"`
+	WeatherLon        *float32 `json:"weather_lon"`
+	DetectUserIP      *string  `json:"detect_user_ip"`
+	LightsOnArrival   *[]int   `json:"lights_on_arrival"`
 }
-
 
 func InitConfigAPI(dbVal api.MemDB) http.HandlerFunc {
 	db = dbVal

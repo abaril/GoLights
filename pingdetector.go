@@ -1,22 +1,23 @@
 package main
+
 import (
+	"github.com/abaril/GoLights/api"
+	"github.com/abaril/go-hue/src/lights"
 	"github.com/tatsushid/go-fastping"
+	"log"
 	"net"
 	"time"
-	"log"
-	"github.com/abaril/go-hue/src/lights"
-	"github.com/abaril/GoLights/api"
 )
 
 const (
-	MAX_PING_SILENCE = 20 * time.Minute
-	PING_RTT = 2 * time.Second
+	MAX_PING_SILENCE      = 20 * time.Minute
+	PING_RTT              = 2 * time.Second
 	PING_POLLING_INTERVAL = 10 * time.Second
 )
 
 func NewUserTrigger(db api.MemDB) TriggerFunc {
 	return func(events chan<- interface{}) {
-		atHome := true;
+		atHome := true
 		db.Set("IsHome", atHome)
 		lastResponse := time.Now()
 
@@ -48,7 +49,7 @@ func NewUserTrigger(db api.MemDB) TriggerFunc {
 				if err != nil {
 					log.Println("Ping failed:", err)
 				}
-				if (time.Now().Sub(lastResponse) >= MAX_PING_SILENCE) {
+				if time.Now().Sub(lastResponse) >= MAX_PING_SILENCE {
 					if atHome {
 						atHome = false
 						db.Set("IsHome", atHome)

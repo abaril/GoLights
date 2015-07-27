@@ -1,11 +1,12 @@
 package main
+
 import (
-	"github.com/abaril/GoLights/api"
-	"time"
-	"log"
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"github.com/abaril/GoLights/api"
+	"log"
+	"net/http"
+	"time"
 )
 
 type WeatherSettings struct {
@@ -15,24 +16,24 @@ type WeatherSettings struct {
 }
 
 type WeatherForecast struct {
-	Time Timestamp `json:"time"`
-	Summary string `json:"summary"`
-	SunriseTime Timestamp `json:"sunriseTime"`
-	SunsetTime Timestamp `json:"sunsetTime"`
-	PrecipProbability float32 `json:"precipProbability"`
-	TemperatureMin float32 `json:"temperatureMin"`
-	TemperatureMax float32 `json:"temperatureMax"`
+	Time              Timestamp `json:"time"`
+	Summary           string    `json:"summary"`
+	SunriseTime       Timestamp `json:"sunriseTime"`
+	SunsetTime        Timestamp `json:"sunsetTime"`
+	PrecipProbability float32   `json:"precipProbability"`
+	TemperatureMin    float32   `json:"temperatureMin"`
+	TemperatureMax    float32   `json:"temperatureMax"`
 }
 
 type weatherDaily struct {
-	Summary string `json:"summary"`
-	Icon string `json:"icon"`
-	Data []WeatherForecast `json:"data"`
+	Summary string            `json:"summary"`
+	Icon    string            `json:"icon"`
+	Data    []WeatherForecast `json:"data"`
 }
 
 type weatherResponse struct {
-	Latitude float32 `json:"latitude"`
-	Daily weatherDaily `json:"daily"`
+	Latitude float32      `json:"latitude"`
+	Daily    weatherDaily `json:"daily"`
 }
 
 func NewCheckIfPollWeather(db api.MemDB) ConditionFunc {
@@ -92,6 +93,6 @@ func fahrenheitToCelcius(f float32) float32 {
 	return (f - 32) / 1.8
 }
 
-func (w *WeatherSettings)determineRequestURL() string {
+func (w *WeatherSettings) determineRequestURL() string {
 	return fmt.Sprintf("https://api.forecast.io/forecast/%s/%f,%f", w.Key, w.Lat, w.Lon)
 }
