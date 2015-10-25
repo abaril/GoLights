@@ -34,13 +34,15 @@ func main() {
 
 	ll := lights.NewLights(hueAddress.(string), hueUsername.(string))
 
+	mqttBroker := db.GetOrDefault("MqttBrokerAddress", "tcp://127.0.0.1:1883")
+	mqttHandleFunc("/dimlights", handleMQTTDimLights)
+	mqttHandleFunc("/devicestatus", handleMQTTDeviceStatusReport);
+	var mqttClient = mqttStart(mqttBroker.(string), "golights")
+
 	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(db), NewAlarmHandler(ll, db))
 	When(NewAlarmTrigger(10*time.Minute), NewCheckIfPollWeather(db), NewPerformWeatherPoll(db))
 	When(NewUserTrigger(db), nil, NewAtHomeChangedHandler(ll, db))
-
-	mqttBroker := db.GetOrDefault("MqttBrokerAddress", "tcp://127.0.0.1:1883")
-	mqttHandleFunc("/dimlights", handleMQTTDimLights)
-	mqttStart(mqttBroker.(string), "golights")
+	When(NewAlarmTrigger(1*time.Minute), nil, NewDeviceStatusPoll(db, mqttClient))
 
 	httpBindAddress := db.GetOrDefault("HttpBindAddress", ":8080")
 	http.HandleFunc("/api/v1/status", InitStatusAPI(db))
