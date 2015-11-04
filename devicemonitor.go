@@ -11,7 +11,7 @@ import (
 
 type DeviceStatusReport struct {
 	Name  string `json:"name"`
-	Timestamp int32   `json:"time"`
+	Time Timestamp   `json:"timestamp"`
 	Alive bool `json:"alive"`
 }
 
