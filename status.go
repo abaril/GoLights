@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 	"math"
-	"log"
 )
 
 type status struct {
