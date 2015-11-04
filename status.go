@@ -55,13 +55,15 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 
 		raw, err = db.Get("DeviceStatus")
 		if err == nil {
-			deviceStatus := raw.(map[string]DeviceStatusReport)
-			for _, status := range deviceStatus {
+			originalStatus := raw.(map[string]DeviceStatusReport)
+			newStatus := make(map[string]DeviceStatusReport)
+			for name, status := range originalStatus {
 				delta := math.Abs(time.Since(status.Time.Time).Minutes())
-				log.Println("Time since = ", delta, " ", time.Since(status.Time.Time))
-				status.Alive = delta <= 5;
+				status.Alive = delta <= 5
+				newStatus[name] = status
+				log.Println("Time since = ", delta, " ", time.Since(status.Time.Time), " ", status.Alive)
 			}
-			s.DeviceStatus = &deviceStatus
+			s.DeviceStatus = &newStatus
 		}
 
 		json.NewEncoder(w).Encode(s)
