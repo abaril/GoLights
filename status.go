@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"math"
+	"log"
 )
 
 type status struct {
@@ -57,6 +58,7 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 			deviceStatus := raw.(map[string]DeviceStatusReport)
 			for _, status := range deviceStatus {
 				delta := math.Abs(time.Since(status.Time.Time).Minutes())
+				log.Println("Time since = ", delta, " ", time.Since(status.Time.Time))
 				status.Alive = delta <= 5;
 			}
 			s.DeviceStatus = &deviceStatus
