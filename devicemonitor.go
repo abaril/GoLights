@@ -23,8 +23,6 @@ func NewHandleMQTTDeviceStatusReport(db api.MemDB) mqtt.MessageHandler {
 		return
 		}
 
-		log.Println("Received ", status)
-
 		raw := db.GetOrDefault("DeviceStatus", make(map[string]DeviceStatusReport))
 		deviceStatus, ok := raw.(map[string]DeviceStatusReport)
 		if !ok {

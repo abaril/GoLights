@@ -61,7 +61,6 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 				delta := math.Abs(time.Since(status.Time.Time).Minutes())
 				status.Alive = delta <= 5
 				newStatus[name] = status
-				log.Println("Time since = ", delta, " ", time.Since(status.Time.Time), " ", status.Alive)
 			}
 			s.DeviceStatus = &newStatus
 		}
