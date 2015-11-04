@@ -5,6 +5,7 @@ import (
 	"github.com/abaril/GoLights/api"
 	"net/http"
 	"time"
+	"math"
 )
 
 type status struct {
@@ -54,6 +55,10 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 		raw, err = db.Get("DeviceStatus")
 		if err == nil {
 			deviceStatus := raw.(map[string]DeviceStatusReport)
+			for _, status := range deviceStatus {
+				delta := math.Abs(time.Since(status.Time.Time).Minutes())
+				status.Alive = delta <= 5;
+			}
 			s.DeviceStatus = &deviceStatus
 		}
 
