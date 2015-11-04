@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION_STRING = "1.0.3"
+	VERSION_STRING = "1.0.4"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 
 	mqttBroker := db.GetOrDefault("MqttBrokerAddress", "tcp://127.0.0.1:1883")
 	mqttHandleFunc("/dimlights", handleMQTTDimLights)
-	mqttHandleFunc("/devicestatus", handleMQTTDeviceStatusReport);
+	mqttHandleFunc("/devicestatus", NewHandleMQTTDeviceStatusReport(db));
 	var mqttClient = mqttStart(mqttBroker.(string), "golights")
 
 	When(NewAlarmTrigger(10*time.Second), NewAlarmExpired(db), NewAlarmHandler(ll, db))

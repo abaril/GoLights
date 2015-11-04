@@ -13,6 +13,7 @@ type status struct {
 	IsHome    bool             `json:"is_home"`
 	NextAlarm *time.Time       `json:"next_alarm,omitempty"`
 	Weather   *WeatherForecast `json:"forecast,omitempty"`
+	DeviceStatus *map[string]DeviceStatusReport `json:"device_status,omitempty"`
 }
 
 var db api.MemDB
@@ -48,6 +49,12 @@ func serveStatus(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			weather := raw.(WeatherForecast)
 			s.Weather = &weather
+		}
+
+		raw, err = db.Get("DeviceStatus")
+		if err == nil {
+			deviceStatus := raw.(map[string]DeviceStatusReport)
+			s.DeviceStatus = &deviceStatus
 		}
 
 		json.NewEncoder(w).Encode(s)
